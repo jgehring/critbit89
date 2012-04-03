@@ -57,7 +57,11 @@ static void *malloc_align_std(size_t alignment, size_t size, void *baton) {
 
 static void free_std(void *ptr, void *baton) {
 	(void)baton; /* Prevent compiler warnigns */
+#ifdef _MSC_VER /* MSVC */
+	_aligned_free(ptr);
+#else
 	free(ptr);
+#endif
 }
 
 /* Static helper functions */
