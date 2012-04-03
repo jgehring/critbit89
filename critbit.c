@@ -21,13 +21,7 @@
   typedef _W64 signed int intptr_t;
  #endif
 #else /* Not MSVC */
- typedef unsigned char uint8_t;
- typedef unsigned int uint32_t;
- #if __WORDSIZE == 64
-  typedef long int intptr_t;
- #else
-  typedef int intptr_t;
- #endif
+ #include <stdint.h>
 #endif
 
 
