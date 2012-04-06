@@ -1,5 +1,5 @@
-critbit89 - A cribit tree implementation for strings in C89
-===========================================================
+critbit89 - A crit-bit tree implementation for strings in C89
+=============================================================
 
 This implementation closely follows the original CWEB source by Dan
 Bernstein [http://cr.yp.to/critbit.html], provided as generated C
