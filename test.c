@@ -82,8 +82,11 @@ static void test_insert_dup(cb_tree_t *tree)
 /* Searching */
 static void test_contains(cb_tree_t *tree)
 {
-	char *in = strdup(dict[23]);
+	char *in;
 	const char *notin = "not in tree";
+
+	in = malloc(strlen(dict[23])+1);
+	strcpy(in, dict[23]);
 
 	if (cb_tree_contains(tree, in) != 1) {
 		fprintf(stderr, "Tree should contain '%s'\n", in);
