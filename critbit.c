@@ -35,7 +35,7 @@ typedef struct {
 /* Standard memory allocation functions */
 static void *malloc_align_std(size_t alignment, size_t size, void *baton) {
 	void *ptr;
-	(void)baton; /* Prevent compiler warnigns */
+	(void)baton; /* Prevent compiler warnings */
 
 #ifdef _MSC_VER /* MSVC */
 	if ((ptr = _aligned_malloc(size, alignment)) == NULL) {
@@ -50,7 +50,7 @@ static void *malloc_align_std(size_t alignment, size_t size, void *baton) {
 }
 
 static void free_std(void *ptr, void *baton) {
-	(void)baton; /* Prevent compiler warnigns */
+	(void)baton; /* Prevent compiler warnings */
 #ifdef _MSC_VER /* MSVC */
 	_aligned_free(ptr);
 #else
@@ -94,7 +94,7 @@ static int cbt_traverse_prefixed(uint8_t *top,
 }
 
 
-/*! Creates an new, empty critbit tree */
+/*! Creates a new, empty critbit tree */
 cb_tree_t cb_tree_make()
 {
 	cb_tree_t tree;
@@ -132,7 +132,7 @@ int cb_tree_contains(cb_tree_t *tree, const char *str)
 	return (strcmp(str, (const char *)p) == 0);
 }
 
-/*! Inserts str into tree, returns 0 on suceess */
+/*! Inserts str into tree, returns 0 on success */
 int cb_tree_insert(cb_tree_t *tree, const char *str)
 {
 	const uint8_t *const ubytes = (void *)str;
@@ -204,7 +204,7 @@ different_byte_found:
 	newnode->otherbits = newotherbits;
 	newnode->child[1 - newdirection] = x;
 
-	/* Insert intro tree */
+	/* Insert into tree */
 	wherep = &tree->root;
 	for (;;) {
 		cb_node_t *q;
@@ -234,7 +234,7 @@ different_byte_found:
 	return 0;
 }
 
-/*! Deletes str from the tree, returns 0 on suceess */
+/*! Deletes str from the tree, returns 0 on success */
 int cb_tree_delete(cb_tree_t *tree, const char *str)
 {
 	const uint8_t *ubytes = (void *)str;
@@ -286,7 +286,7 @@ void cb_tree_clear(cb_tree_t *tree)
 	tree->root = NULL;
 }
 
-/*! Calls callback for all strings in tree with the given prefix  */
+/*! Calls callback for all strings in tree with the given prefix */
 int cb_tree_walk_prefixed(cb_tree_t *tree, const char *prefix,
 	int (*callback)(const char *, void *), void *baton)
 {
