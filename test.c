@@ -154,6 +154,18 @@ static void test_delete_all(cb_tree_t *tree)
 	}
 }
 
+/* Fake allocator */
+static void *fake_malloc(size_t s, void *b) { return NULL; }
+static void test_allocator(cb_tree_t *unused)
+{
+	cb_tree_t tree = cb_tree_make();
+	tree.malloc = fake_malloc;
+	if (cb_tree_insert(&tree, dict[0]) != ENOMEM) {
+		fprintf(stderr, "ENOMEM failure expected\n");
+		abort();
+	}
+}
+
 /* Empty tree */
 static void test_empty(cb_tree_t *tree)
 {
@@ -220,6 +232,9 @@ int main(int argc, char **argv)
 
 	printf("%d ", ++tnum); fflush(stdout);
 	test_complete(&tree, 0);
+
+	printf("%d ", ++tnum); fflush(stdout);
+	test_allocator(&tree);
 
 	printf("%d ", ++tnum); fflush(stdout);
 	cb_tree_clear(&tree);

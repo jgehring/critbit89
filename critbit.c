@@ -35,6 +35,16 @@ typedef struct {
 	uint8_t otherbits;
 } cb_node_t;
 
+/* Standard memory allocation functions */
+static void *malloc_std(size_t size, void *baton) {
+	(void)baton; /* Prevent compiler warnings */
+	return malloc(size);
+}
+
+static void free_std(void *ptr, void *baton) {
+	(void)baton; /* Prevent compiler warnings */
+	free(ptr);
+}
 
 /* Static helper functions */
 static void cbt_traverse_delete(cb_tree_t *tree, void *top)
@@ -44,9 +54,9 @@ static void cbt_traverse_delete(cb_tree_t *tree, void *top)
 		cb_node_t *q = (void *)(p - 1);
 		cbt_traverse_delete(tree, q->child[0]);
 		cbt_traverse_delete(tree, q->child[1]);
-		free(q);
+		tree->free(q, tree->baton);
 	} else {
-		free(p);
+		tree->free(p, tree->baton);
 	}
 }
 
@@ -77,6 +87,9 @@ cb_tree_t cb_tree_make()
 {
 	cb_tree_t tree;
 	tree.root = NULL;
+	tree.malloc = &malloc_std;
+	tree.free = &free_std;
+	tree.baton = NULL;
 	return tree;
 }
 
@@ -121,7 +134,7 @@ int cb_tree_insert(cb_tree_t *tree, const char *str)
 	void **wherep;
 
 	if (p == NULL) {
-		x = malloc(ulen + 1);
+		x = tree->malloc(ulen + 1, tree->baton);
 		if (x == NULL) {
 			return ENOMEM;
 		}
@@ -162,14 +175,14 @@ different_byte_found:
 	c = p[newbyte];
 	newdirection = (1 + (newotherbits | c)) >> 8;
 
-	newnode = malloc(sizeof(cb_node_t));
+	newnode = tree->malloc(sizeof(cb_node_t), tree->baton);
 	if (newnode == NULL) {
 		return ENOMEM;
 	}
 
-	x = malloc(ulen + 1);
+	x = tree->malloc(ulen + 1, tree->baton);
 	if (x == NULL) {
-		free(newnode);
+		tree->free(newnode, tree->baton);
 		return ENOMEM;
 	}
 
@@ -239,7 +252,7 @@ int cb_tree_delete(cb_tree_t *tree, const char *str)
 	if (strcmp(str, (const char *)p) != 0) {
 		return 1;
 	}
-	free(p);
+	tree->free(p, tree->baton);
 
 	if (!whereq) {
 		tree->root = NULL;
@@ -247,7 +260,7 @@ int cb_tree_delete(cb_tree_t *tree, const char *str)
 	}
 
 	*whereq = q->child[1 - direction];
-	free(q);
+	tree->free(q, tree->baton);
 	return 0;
 }
 
