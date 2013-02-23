@@ -17,9 +17,9 @@ extern "C" {
 /*! Main data structure */
 typedef struct {
 	void *root;
-	void *(*malloc_align)(size_t alignment, size_t size, void *baton);
+	void *(*malloc)(size_t size, void *baton);
 	void (*free)(void *ptr, void *baton);
-	void *baton; /*! Passed to malloc_align() and free() */
+	void *baton; /*! Passed to malloc() and free() */
 } cb_tree_t;
 
 /*! Creates an new, empty critbit tree */

@@ -3,8 +3,12 @@
  * Written by Jonas Gehring <jonas@jgehring.net>
  */
 
-
-#define _POSIX_C_SOURCE 200112L /* For posix_memalign */
+/*
+ * The code makes the assumption that malloc returns pointers aligned at at
+ * least a two-byte boundary. Since the C standard requires that malloc return
+ * pointers that can store any type, there are no commonly-used toolchains for
+ * which this assumption is false.
+ */
 
 #include <errno.h>
 #include <string.h>
@@ -31,31 +35,15 @@ typedef struct {
 	uint8_t otherbits;
 } cb_node_t;
 
-
 /* Standard memory allocation functions */
-static void *malloc_align_std(size_t alignment, size_t size, void *baton) {
-	void *ptr;
+static void *malloc_std(size_t size, void *baton) {
 	(void)baton; /* Prevent compiler warnings */
-
-#ifdef _MSC_VER /* MSVC */
-	if ((ptr = _aligned_malloc(size, alignment)) == NULL) {
-		return NULL;
-	}
-#else
-	if (posix_memalign(&ptr, alignment, size) != 0) {
-		return NULL;
-	}
-#endif
-	return ptr;
+	return malloc(size);
 }
 
 static void free_std(void *ptr, void *baton) {
 	(void)baton; /* Prevent compiler warnings */
-#ifdef _MSC_VER /* MSVC */
-	_aligned_free(ptr);
-#else
 	free(ptr);
-#endif
 }
 
 /* Static helper functions */
@@ -66,9 +54,9 @@ static void cbt_traverse_delete(cb_tree_t *tree, void *top)
 		cb_node_t *q = (void *)(p - 1);
 		cbt_traverse_delete(tree, q->child[0]);
 		cbt_traverse_delete(tree, q->child[1]);
-		(tree->free)(q, tree->baton);
+		tree->free(q, tree->baton);
 	} else {
-		(tree->free)(p, tree->baton);
+		tree->free(p, tree->baton);
 	}
 }
 
@@ -99,7 +87,7 @@ cb_tree_t cb_tree_make()
 {
 	cb_tree_t tree;
 	tree.root = NULL;
-	tree.malloc_align = &malloc_align_std;
+	tree.malloc = &malloc_std;
 	tree.free = &free_std;
 	tree.baton = NULL;
 	return tree;
@@ -146,7 +134,7 @@ int cb_tree_insert(cb_tree_t *tree, const char *str)
 	void **wherep;
 
 	if (p == NULL) {
-		x = (tree->malloc_align)(sizeof(void *), ulen + 1, tree->baton);
+		x = tree->malloc(ulen + 1, tree->baton);
 		if (x == NULL) {
 			return ENOMEM;
 		}
@@ -187,15 +175,14 @@ different_byte_found:
 	c = p[newbyte];
 	newdirection = (1 + (newotherbits | c)) >> 8;
 
-	newnode =
-		(tree->malloc_align)(sizeof(void *), sizeof(cb_node_t), tree->baton);
+	newnode = tree->malloc(sizeof(cb_node_t), tree->baton);
 	if (newnode == NULL) {
 		return ENOMEM;
 	}
 
-	x = (tree->malloc_align)(sizeof(void *), ulen + 1, tree->baton);
+	x = tree->malloc(ulen + 1, tree->baton);
 	if (x == NULL) {
-		(tree->free)(newnode, tree->baton);
+		tree->free(newnode, tree->baton);
 		return ENOMEM;
 	}
 
@@ -265,7 +252,7 @@ int cb_tree_delete(cb_tree_t *tree, const char *str)
 	if (strcmp(str, (const char *)p) != 0) {
 		return 1;
 	}
-	(tree->free)(p, tree->baton);
+	tree->free(p, tree->baton);
 
 	if (!whereq) {
 		tree->root = NULL;
@@ -273,7 +260,7 @@ int cb_tree_delete(cb_tree_t *tree, const char *str)
 	}
 
 	*whereq = q->child[1 - direction];
-	(tree->free)(q, tree->baton);
+	tree->free(q, tree->baton);
 	return 0;
 }
 

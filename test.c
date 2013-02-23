@@ -155,11 +155,11 @@ static void test_delete_all(cb_tree_t *tree)
 }
 
 /* Fake allocator */
-static void *fake_malloc(size_t a, size_t s, void *b) { return NULL; }
+static void *fake_malloc(size_t s, void *b) { return NULL; }
 static void test_allocator(cb_tree_t *unused)
 {
 	cb_tree_t tree = cb_tree_make();
-	tree.malloc_align = fake_malloc;
+	tree.malloc = fake_malloc;
 	if (cb_tree_insert(&tree, dict[0]) != ENOMEM) {
 		fprintf(stderr, "ENOMEM failure expected\n");
 		abort();
