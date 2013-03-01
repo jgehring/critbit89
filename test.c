@@ -192,7 +192,37 @@ static void test_prefixes(cb_tree_t *tree)
 	}
 
 	if (cb_tree_walk_prefixed(tree, "11", count_cb, &i) != 0) {
-		fprintf(stderr, "Walking with empty prefix failed\n");
+		fprintf(stderr, "Walking with prefix failed\n");
+		abort();
+	}
+	if (i != 2) {
+		fprintf(stderr, "2 items expected, but %d walked\n", i);
+		abort();
+	}
+
+	i = 0;
+	if (cb_tree_walk_prefixed(tree, "13", count_cb, &i) != 0) {
+		fprintf(stderr, "Walking with non-matching prefix failed\n");
+		abort();
+	}
+	if (i != 0) {
+		fprintf(stderr, "0 items expected, but %d walked\n", i);
+		abort();
+	}
+
+	i = 0;
+	if (cb_tree_walk_prefixed(tree, "12345678", count_cb, &i) != 0) {
+		fprintf(stderr, "Walking with long prefix failed\n");
+		abort();
+	}
+	if (i != 0) {
+		fprintf(stderr, "0 items expected, but %d walked\n", i);
+		abort();
+	}
+
+	i = 0;
+	if (cb_tree_walk_prefixed(tree, "11str", count_cb, &i) != 0) {
+		fprintf(stderr, "Walking with exactly matching prefix failed\n");
 		abort();
 	}
 	if (i != 2) {
