@@ -302,7 +302,7 @@ int cb_tree_walk_prefixed(cb_tree_t *tree, const char *prefix,
 		}
 	}
 
-	if (memcmp(p, prefix, ulen) != 0) {
+	if (strlen((const char *)p) < ulen || memcmp(p, prefix, ulen) != 0) {
 		/* No strings match */
 		return 0;
 	}
