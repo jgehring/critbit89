@@ -302,5 +302,10 @@ int cb_tree_walk_prefixed(cb_tree_t *tree, const char *prefix,
 		}
 	}
 
+	if (strlen((const char *)p) < ulen || memcmp(p, prefix, ulen) != 0) {
+		/* No strings match */
+		return 0;
+	}
+
 	return cbt_traverse_prefixed(top, callback, baton);
 }
