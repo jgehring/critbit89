@@ -10,3 +10,21 @@ has been added.
 
 Hereby placed under public domain, just like Dan Bernstein's original
 implementation.
+
+Example of a string:
+
+#include<stdio.h>
+int main()
+{
+  char s[20];
+  printf("Enter your name:");
+  scanf("%s",s);
+  printf("\nHi!! %s",s);
+  return 0;
+{
+
+
+OUTPUT
+
+Enter your name: ABC
+Hi!! ABC
